@@ -67,12 +67,12 @@ public class Reiziger {
                 ", achternaam='" + achternaam + '\'' +
                 ", geboortedatum=" + geboortedatum +
                  ",adres=("+
-                ", achternaam='" + adres.getId() + '\'' +
-                ", achternaam='" + adres.getPostcode() + '\'' +
-                ", achternaam='" + adres.getHuisnummer() + '\'' +
-                ", achternaam='" + adres.getHuisnummer() + '\'' +
-                ", achternaam='" + adres.getStraat() + '\'' +
-                ", achternaam='" + adres.getWoonplaats() + '\'' +
+                ", #'" + adres.getId() + '\'' +
+                ", '" + adres.getPostcode() + '\'' +
+                ", '" + adres.getHuisnummer() + '\'' +
+//                ", achternaam='" + adres.getHuisnummer() + '\'' +
+//                ", achternaam='" + adres.getStraat() + '\'' +
+//                ", achternaam='" + adres.getWoonplaats() + '\'' +
                 '}';
     }
 }
