@@ -1,4 +1,4 @@
-package p3;
+package p4;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -11,15 +11,23 @@ public class Main {
     private static Connection connection;
     private static AdresDAOsql adao;
     private static ReizigerDAOPsql rdao;
+    private static OVChipkaartDAOPsql ovdao;
 
     public static void main(String[] args) throws SQLException {
         Connection Conn = getConnection();
+
         adao = new AdresDAOsql(Conn);
-        rdao = new ReizigerDAOPsql(Conn,adao);
+        ovdao = new OVChipkaartDAOPsql(Conn);
+
+        rdao = new ReizigerDAOPsql(Conn, adao, ovdao);
+
+        ovdao.connectRDAO(rdao);
         adao.connectRDAO(rdao);
+
         try {
             testReizigerDAO(rdao);
             testAdresDAO();
+            testOVchipkaartDAO();
         }  catch(Exception err) {
             System.err.println("error in testReizigersDAO " + err.getMessage() );
         }
@@ -158,7 +166,7 @@ public class Main {
 
 
         //getbyreiziger
-        ReizigerDAO rdao = new ReizigerDAOPsql(connection, adao);
+        ReizigerDAO rdao = new ReizigerDAOPsql(connection, adao,ovdao);
         Adres reizigadres = adao.findByReiziger( rdao.findByid(2) );
         System.out.println(reizigadres);
         System.out.println();
@@ -173,7 +181,61 @@ public class Main {
 
 
     }
+    private static void testOVchipkaartDAO() throws SQLException {
+        System.out.println("\n---------- Test OVChipkaart dao -------------");
 
+        // Haal alle ovchipkaarten op uit de database
+        List<OVChipkaart> ovchip = ovdao.findall();
+        System.out.println("[Test] OVchipKaart.findAll() geeft de volgende Kaarten:");
+        for (OVChipkaart ov : ovchip) {
+            System.out.println(ov);
+        }
+        System.out.println();
+
+        // Maak een nieuw ovchip aan en persisteer deze in de database
+
+        OVChipkaart newov = new OVChipkaart(78594, Date.valueOf("2022-09-20"), 2, 0.00, 6,null);
+        System.out.print("[Test] Eerst " + ovchip.size() + " ovchipkaarten, na ovdao.save() ");
+        ovdao.save(newov);
+        ovchip = ovdao.findall();
+        System.out.println(ovchip.size() + " ovchipkaarten\n");
+
+        //update ovchip
+
+
+        System.out.println("[Test] AdresDAO.update() before:");
+        List<OVChipkaart> ov = ovdao.findall();
+        for (OVChipkaart r : ov) {
+            System.out.println(r);
+        }
+        System.out.println();
+        newov.setSaldo(25.00);
+        newov.setGeldig_tot(Date.valueOf("2025-09-20"));
+        ovdao.update(newov);
+        List<OVChipkaart> ovs=ovdao.findall();
+        for (OVChipkaart r : ovs) {
+            System.out.println(r);
+        }
+        System.out.println();
+
+        // delete een ovchipkaart en persisteer deze in de database
+        System.out.print("[Test] delete by id");
+        System.out.println("\nbefore");
+        List<OVChipkaart> ov3=ovdao.findall();
+        System.out.println(ov3.size() + " reizigers\n");
+        ovdao.delete(newov);
+        System.out.println("after");
+        List<OVChipkaart> ov4=ovdao.findall();
+        System.out.println(ov4.size() + " reizigers\n");
+
+        // FindByreiziger
+        System.out.println("[Test] findByReiziger reiziger met id 1");
+
+        List<OVChipkaart> OVChipkaarten = ovdao.findByReiziger( rdao.findByid(1) );
+        for (OVChipkaart o : OVChipkaarten) {
+            System.out.println(o);
+        }
+    }
 
 
     }

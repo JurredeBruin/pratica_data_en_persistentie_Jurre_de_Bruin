@@ -1,6 +1,4 @@
-package p3;
-
-import java.sql.Date;
+package p4;
 
 public class Adres{
     private int id;
@@ -9,18 +7,18 @@ public class Adres{
     private String straat;
     private String woonplaats;
     private int reiziger_id;
-    private Reiziger reizigerObj;
+    private Reiziger reisobj;
 
-    public Adres (int id, String postcode, String huisnummer, String straat, String woonplaats, int reiziger_id, Reiziger reizigerObj) {
+    public Adres (int id, String postcode, String huisnummer, String straat, String woonplaats, int reiziger_id, Reiziger reisobj) {
         this.id = id;
         this.postcode = postcode;
         this.huisnummer = huisnummer;
         this.straat = straat;
         this.woonplaats = woonplaats;
         this.reiziger_id = reiziger_id;
-        this.reizigerObj = reizigerObj;
-        if (reizigerObj != null) {
-            this.reizigerObj.setAdres(this);
+        this.reisobj = reisobj;
+        if (reisobj != null) {
+            this.reisobj.setAdres(this);
         }
     }
 
@@ -44,10 +42,10 @@ public class Adres{
         String adresStr = "Adres{ ";
         adresStr += this.__internalGetInfo() + ", ";
 
-        if (reizigerObj == null) {
+        if (reisobj == null) {
             adresStr += "NULL";
         } else {
-            adresStr += "Reiziger" + this.reizigerObj.getInfo();
+            adresStr += "Reiziger" + this.reisobj.getInfo();
         }
 
         adresStr += " }";
@@ -92,28 +90,10 @@ public class Adres{
         this.reiziger_id = reiziger_id;
     }
     public Reiziger getReiziger() {
-        return reizigerObj;
+        return reisobj;
     }
     public void setReiziger(Reiziger reiziger) {
-        this.reizigerObj = reiziger;
+        this.reisobj = reiziger;
     }
-//    @Override
-//    public String toString() {
-//        String reiziger1="";
-//        if(reizigerObj==null){
-//            reiziger1="null";
-//        }else{
-//            reiziger1=reizigerObj.getVoorletters();
-//        }
-//        return "Adres{" +
-//                "id=" + id +
-//                ", poscode='" + postcode + '\'' +
-//                ", huisnummer='" + huisnummer + '\'' +
-//                ", straat='" + straat + '\'' +
-//                ", woonplaats='" + woonplaats + '\'' +
-//                ", voorletters='" + reiziger1+ '\'' +
-//                ", reiziger_id=" + reiziger_id +
-//                '}';
-//    }
 
 }

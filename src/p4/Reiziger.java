@@ -1,9 +1,9 @@
-package p3;
+package p4;
 
 import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 public class Reiziger {
     private int Id;
@@ -12,7 +12,9 @@ public class Reiziger {
     private String achternaam;
     private Date geboortedatum;
     private Adres adres;
-    public Reiziger(int id, String vl, String tv, String an, Date gd,Adres ad) {
+    private List<OVChipkaart> OvChipkaartList;
+
+    public Reiziger(int id, String vl, String tv, String an, Date gd, Adres ad) {
         this.Id=id;
         this.voorletters=vl;
         this.tussenvoegsel=tv;
@@ -24,34 +26,45 @@ public class Reiziger {
             this.adres.setReiziger(this);
         }
     }
-    public String getName() {
-        if (this.tussenvoegsel != "" && this.tussenvoegsel != null) {
-            return this.voorletters + " " + this.tussenvoegsel + " " + this.achternaam;
-        } else {
-            return this.voorletters + " " + this.achternaam;
-        }
+    public String getInfo() {
+        return  "{ " + this.extrainfo() + " }";
     }
+
 
     public String toString() {
-        String reizigerStr = "Reiziger{ ";
+        String AdresObjString = "";
 
-        reizigerStr += __internalGetInfo() + ", ";
         if (this.adres != null) {
-            reizigerStr += "Adres" + this.adres.getInfo();
+            AdresObjString += "Adres" + this.adres.getInfo();
         } else {
-            reizigerStr += ", null";
+            AdresObjString += "null";
         }
 
-        reizigerStr += " }";
+        String OvChipkaartList = "";
+        if (this.OvChipkaartList != null && !this.OvChipkaartList.isEmpty()) {
+            OvChipkaartList += "chip kaarten lijst[";
+            for (int i=0; i <this.OvChipkaartList.size(); i++) {
+                if (i > 1) {
+                    OvChipkaartList += ", ";
+                }
+                OvChipkaartList += " OvChipkaart" + this.OvChipkaartList.get(i).getInfo();
+            }
+            OvChipkaartList += " ]";
+        } else {
+            OvChipkaartList = "null";
+        }
 
-        return reizigerStr;
+        String rs = "Reiziger{ ";
+        rs += extrainfo() + ", ";
+        rs += AdresObjString + ", ";
+        rs += OvChipkaartList;
+        rs += " }";
+
+        return rs;
     }
 
-    public String getInfo() {
-        return  "{ " + this.__internalGetInfo() + " }";
-    }
 
-    private String __internalGetInfo() {
+    private String extrainfo() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String gDatumStr = dateFormat.format(this.geboortedatum);
 
@@ -103,24 +116,6 @@ public class Reiziger {
         this.geboortedatum = geboortedatum;
     }
 
-//    @Override
-//    public String toString() {
-//        return "Reiziger{" +
-//                "Id=" + Id +
-//                ", voorletters='" + voorletters + '\'' +
-//                ", tussenvoegsel='" + tussenvoegsel + '\'' +
-//                ", achternaam='" + achternaam + '\'' +
-//                ", geboortedatum=" + geboortedatum +
-//                 ",adres=("+
-//                ", #'" + adres.getId() + '\'' +
-//                ", '" + adres.getPostcode() + '\'' +
-//                ", '" + adres.getHuisnummer() + ')'+'\'' +
-////                ", achternaam='" + adres.getHuisnummer() + '\'' +
-////                ", achternaam='" + adres.getStraat() + '\'' +
-////                ", achternaam='" + adres.getWoonplaats() + '\'' +
-//                '}';
-//    }
-
     public void setAdres(Adres adresObj) {
         this.adres = adresObj;
     }
@@ -128,4 +123,7 @@ public class Reiziger {
     public Adres getAdres() {
         return adres;
     }
+
+    public void setOvChipkaartList(List<OVChipkaart> ovChipkaartList) { this.OvChipkaartList = ovChipkaartList;}
+    public List<OVChipkaart> getOvChipkaartList() {return this.OvChipkaartList;}
 }
