@@ -28,6 +28,12 @@ public class ReizigerDAOPsql implements ReizigerDAO {
             preparedStmt.setDate    (5, reiziger.getGeboortedatum());
 
             preparedStmt.execute();
+            adao.save(reiziger.getAdres());
+            if(reiziger.getOvChipkaartList()!=null){
+                for(OVChipkaart ov:reiziger.getOvChipkaartList()){
+                    ovdao.save(ov);
+                }
+            }
 
 
             return true;
@@ -50,7 +56,12 @@ public class ReizigerDAOPsql implements ReizigerDAO {
             preparedStmt.setInt(5,reiziger.getId());
 
             preparedStmt.execute();
-
+            adao.update(reiziger.getAdres());
+            if(reiziger.getOvChipkaartList()!=null){
+                for(OVChipkaart ov:reiziger.getOvChipkaartList()){
+                    ovdao.update(ov);
+                }
+            }
             return true;
 
         } catch (SQLException throwables) {
@@ -60,7 +71,12 @@ public class ReizigerDAOPsql implements ReizigerDAO {
 
     public boolean delete(Reiziger reiziger) {
         try {
-
+            adao.delete(reiziger.getAdres());
+            if(reiziger.getOvChipkaartList()!=null){
+                for(OVChipkaart ov:reiziger.getOvChipkaartList()){
+                    ovdao.delete(   ov);
+                }
+            }
             String query = "Delete from reiziger where reiziger_id=?";
             PreparedStatement preparedStmt = conn.prepareStatement(query);
             preparedStmt.setInt (1, reiziger.getId());

@@ -27,8 +27,7 @@ public class ReizigerDAOPsql implements ReizigerDAO {
 
             // execute the preparedstatement
             preparedStmt.execute();
-//            Adres adres= adao.findByReizigerid(reiziger.getId());
-//            adao.save(adres);
+            adao.save(reiziger.getAdres());
 
             return true;
 
@@ -51,8 +50,7 @@ public class ReizigerDAOPsql implements ReizigerDAO {
             preparedStmt.setInt(5,reiziger.getId());
 
             preparedStmt.execute();
-//            Adres adres= adao.findByReizigerid(reiziger.getId());
-//            adao.update(adres);
+            adao.update(reiziger.getAdres());
 
             return true;
 
@@ -64,15 +62,12 @@ public class ReizigerDAOPsql implements ReizigerDAO {
     public boolean delete(Reiziger reiziger) {
         try {
 //            Statement ctt = conn.createStatement();
-
+            adao.delete(reiziger.getAdres());
             String query = "Delete from reiziger where reiziger_id=?";
             PreparedStatement preparedStmt = conn.prepareStatement(query);
             preparedStmt.setInt (1, reiziger.getId());
 
             preparedStmt.execute();
-//            Adres adres= adao.findByReizigerid(reiziger.getId());
-//            adao.delete(adres);
-
             return true;
 
         } catch (SQLException throwables) {

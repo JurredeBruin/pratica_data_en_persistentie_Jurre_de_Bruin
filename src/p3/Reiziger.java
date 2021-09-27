@@ -1,5 +1,7 @@
 package p3;
 
+import p4.OVChipkaart;
+
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.text.DateFormat;
@@ -12,6 +14,7 @@ public class Reiziger {
     private String achternaam;
     private Date geboortedatum;
     private Adres adres;
+
     public Reiziger(int id, String vl, String tv, String an, Date gd,Adres ad) {
         this.Id=id;
         this.voorletters=vl;
