@@ -26,8 +26,8 @@ public class Main {
 
         rdao = new ReizigerDAOPsql(Conn, adao, ovdao);
 
-        ovdao.connectRDAO(rdao);
-        adao.connectRDAO(rdao);
+        ovdao.setReizigerDAO(rdao);
+        adao.setReizigerDAO(rdao);
 
         try {
             testReizigerDAO(rdao);
@@ -57,6 +57,10 @@ public class Main {
             connection.close();
         }
     }
+
+
+
+
     private static void testReizigerDAO(ReizigerDAO rdao) throws SQLException {
         System.out.println("\n---------- Test ReizigerDAO -------------");
 
@@ -71,8 +75,8 @@ public class Main {
         // Maak een nieuwe reiziger aan en persisteer deze in de database
         String gbdatum = "1981-03-14";
         AdresDAO adao = new AdresDAOsql(connection);
-        Adres gideonstraat3 = new Adres(7, "8754kl", "786", "gideonstraat", "noorwegen",20,null);
-        Reiziger sietske = new Reiziger(20, "S", "", "Boers", Date.valueOf(gbdatum),gideonstraat3);
+        Adres gideonstraat3 = new Adres(7, "8754kl", "786", "gideonstraat", "noorwegen",20);
+        Reiziger sietske = new Reiziger(20, "S", "", "Boers", Date.valueOf(gbdatum));
         System.out.print("[Test] Eerst " + reizigers.size() + " reizigers, na ReizigerDAO.save() ");
         rdao.save(sietske);
         reizigers = rdao.findAll();
@@ -86,7 +90,7 @@ public class Main {
         for (Reiziger r : reizigers1) {
             System.out.println(r);
         }
-        Reiziger sietske2 = new Reiziger(20, "s", "", "Visser", Date.valueOf(gebdatum),gideonstraat3);
+        Reiziger sietske2 = new Reiziger(20, "s", "", "Visser", Date.valueOf(gebdatum));
         System.out.println("[Test] ReizigerDAO.update() after:");
 
         rdao.update(sietske2);
@@ -99,7 +103,7 @@ public class Main {
 
         // delete een reiziger aan en persisteer deze in de database
         String gebodatum = "2002-09-17";
-        Reiziger sietske3 = new Reiziger(20, "s", "", "Visser", Date.valueOf(gebodatum),gideonstraat3);
+        Reiziger sietske3 = new Reiziger(20, "s", "", "Visser", Date.valueOf(gebodatum));
         System.out.print("[Test] delete by id");
         rdao.delete(sietske3);
         List<Reiziger> reizigers3=rdao.findAll();
@@ -134,7 +138,7 @@ public class Main {
         System.out.println("\n---------- Test Adres dao -------------");
         if (rdao.findByid(6) == null) {
             String gbdatum2 = "1981-03-14";
-            Reiziger test = new Reiziger(6, "t", "est", " voor adres", Date.valueOf(gbdatum2), null);
+            Reiziger test = new Reiziger(6, "t", "est", " voor adres", Date.valueOf(gbdatum2));
             rdao.save(test);
         }
         // Haal alle adressen op uit de database
@@ -147,7 +151,7 @@ public class Main {
 
         // Maak een nieuw adres aan en persisteer deze in de database
 
-        Adres gideonstraat = new Adres(7, "8754kl", "786", "gideonstraat", "noorwegen",33,null);
+        Adres gideonstraat = new Adres(7, "8754kl", "786", "gideonstraat", "noorwegen",33);
         System.out.print("[Test] Eerst " + adres.size() + " adressen, na adao.save() ");
         adao.save(gideonstraat);
         adres = adao.findall();
@@ -180,7 +184,7 @@ public class Main {
 
 
         //delete adres
-        Adres gideonstraat3 = new Adres(7, "9986ol", "786", "gideonstraat", "noorwegen",33,null);
+        Adres gideonstraat3 = new Adres(7, "9986ol", "786", "gideonstraat", "noorwegen",33);
         System.out.print("[Test] delete by id ");
         adao.delete(gideonstraat3);
         List<Adres> adres4=adao.findall();

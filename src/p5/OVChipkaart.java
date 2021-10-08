@@ -65,8 +65,14 @@ public class OVChipkaart {
     public Reiziger getReiziger() {
         return reizigerObj;
     }
-    public void setReiziger(Reiziger reiziger) {
-        this.reizigerObj = reiziger;
+    public void setReiziger(Reiziger reizigerObj, boolean relationCalled) {
+        this.reizigerObj = reizigerObj;
+
+        if (!relationCalled) {
+            ArrayList<OVChipkaart> ovChipkaartList = new ArrayList();
+            ovChipkaartList.add(this);
+            this.reizigerObj.setOvChipkaartList(ovChipkaartList, true);
+        }
     }
     public ArrayList<Product> getProductList() {return productlist;}
     public void setProductList(ArrayList<Product> productList, boolean relationCalled) {

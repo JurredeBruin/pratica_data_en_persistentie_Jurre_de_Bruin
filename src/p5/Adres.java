@@ -9,17 +9,13 @@ public class Adres{
     private int reiziger_id;
     private Reiziger reisobj;
 
-    public Adres (int id, String postcode, String huisnummer, String straat, String woonplaats, int reiziger_id, Reiziger reisobj) {
+    public Adres (int id, String straat, String huisnummer, String woonplaats, String postcode, int reizigerId) {
         this.id = id;
-        this.postcode = postcode;
-        this.huisnummer = huisnummer;
         this.straat = straat;
+        this.huisnummer = huisnummer;
         this.woonplaats = woonplaats;
-        this.reiziger_id = reiziger_id;
-        this.reisobj = reisobj;
-        if (reisobj != null) {
-            this.reisobj.setAdres(this);
-        }
+        this.postcode = postcode;
+        this.reiziger_id = reizigerId;
     }
 
     private String __internalGetInfo() {
@@ -92,8 +88,10 @@ public class Adres{
     public Reiziger getReiziger() {
         return reisobj;
     }
-    public void setReiziger(Reiziger reiziger) {
+    public void setReiziger(Reiziger reiziger, boolean relationCalled) {
         this.reisobj = reiziger;
+        if (!relationCalled) {
+            reiziger.setAdres(this, true);
+        }
     }
-
 }

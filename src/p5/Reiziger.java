@@ -3,6 +3,7 @@ package p5;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Reiziger {
@@ -12,19 +13,14 @@ public class Reiziger {
     private String achternaam;
     private Date geboortedatum;
     private Adres adres;
-    private List<OVChipkaart> OvChipkaartList;
+    private ArrayList<OVChipkaart> OvChipkaartList;
 
-    public Reiziger(int id, String vl, String tv, String an, Date gd, Adres ad) {
+    public Reiziger(int id, String vl, String tv, String an, Date gd) {
         this.Id=id;
         this.voorletters=vl;
         this.tussenvoegsel=tv;
         this.achternaam=an;
         this.geboortedatum=gd;
-        this.adres=ad;
-
-        if (this.adres != null) {
-            this.adres.setReiziger(this);
-        }
     }
     public String getInfo() {
         return  "{ " + this.extrainfo() + " }";
@@ -116,14 +112,22 @@ public class Reiziger {
         this.geboortedatum = geboortedatum;
     }
 
-    public void setAdres(Adres adresObj) {
+    public void setAdres(Adres adresObj, boolean relationCalled) {
         this.adres = adresObj;
+        if (!relationCalled){
+            this.adres.setReiziger(this, true);
+        }
     }
-
     public Adres getAdres() {
         return adres;
     }
 
-    public void setOvChipkaartList(List<OVChipkaart> ovChipkaartList) { this.OvChipkaartList = ovChipkaartList;}
-    public List<OVChipkaart> getOvChipkaartList() {return this.OvChipkaartList;}
-}
+    public ArrayList<OVChipkaart> getOvChipkaartList() {return this.OvChipkaartList;}
+    public void setOvChipkaartList(ArrayList<OVChipkaart> ovChipkaartList, boolean relationCalled) {
+        this.OvChipkaartList = ovChipkaartList;
+        if (!relationCalled) {
+            for (OVChipkaart ovChipkaart : this.OvChipkaartList) {
+                ovChipkaart.setReiziger(this, true);
+            }
+        }
+    }}
