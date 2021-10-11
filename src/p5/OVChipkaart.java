@@ -1,121 +1,111 @@
 package p5;
 
-import java.sql.Date;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class OVChipkaart {
-    private int kaart_nummer=0;
-    private Date geldig_tot;
-    private int klasse=0;
-    private double saldo=0;
-    private int reiziger_id=0;
-    private Reiziger reizigerObj;
-    private ArrayList<Product> productlist;
+    private int kaartNummer;
+    private Date geldigTot;
+    private int klasse;
+    private float saldo;
+    private Reiziger reiziger;
+    private ArrayList<Product> producten = new ArrayList<Product>();
 
+    public static ArrayList<OVChipkaart> alleOvChipkaarten = new ArrayList<>();
 
-    public OVChipkaart(int kaart_nummer, Date geldig_tot, int klasse, double saldo, int reiziger_id) {
-        this.kaart_nummer=kaart_nummer;
-        this.geldig_tot=geldig_tot;
-        this.klasse=klasse;
-        this.saldo=saldo;
-        this.reiziger_id=reiziger_id;
-    }
-
-    public void setReiziger_id(int reiziger_id) {
-        this.reiziger_id = reiziger_id;
-    }
-
-    public int getReiziger_id() {
-        return reiziger_id;
-    }
-
-    public Date getGeldig_tot() {
-        return geldig_tot;
-    }
-
-    public void setGeldig_tot(Date geldig_tot) {
-        this.geldig_tot = geldig_tot;
-    }
-
-    public void setKaart_nummer(int kaart_nummer) {
-        this.kaart_nummer = kaart_nummer;
-    }
-
-    public int getKaart_nummer() {
-        return kaart_nummer;
-    }
-
-    public void setKlasse(int klasse) {
+    public OVChipkaart(int kaartNummer, Date geldig_tot, int klasse, float saldo, Reiziger reiziger) {
+        this.kaartNummer = kaartNummer;
+        this.geldigTot = geldig_tot;
         this.klasse = klasse;
+        this.saldo = saldo;
+        this.reiziger = reiziger;
+
+        if(!alleOvChipkaarten.contains(this)){
+            alleOvChipkaarten.add(this);
+        }
+    }
+
+    public int getKaartNummer() {
+        return kaartNummer;
+    }
+
+    public void setKaartNummer(int kaartNummer) {
+        this.kaartNummer = kaartNummer;
+    }
+
+    public Date getGeldigTot() {
+        return geldigTot;
+    }
+
+    public void setGeldigTot(Date geldig_tot) {
+        this.geldigTot = geldig_tot;
     }
 
     public int getKlasse() {
         return klasse;
     }
 
-    public void setSaldo(double sald0) {
-        this.saldo = sald0;
+    public void setKlasse(int klasse) {
+        this.klasse = klasse;
     }
 
-    public double getSaldo() {
+    public float getSaldo() {
         return saldo;
     }
+
+    public void setSaldo(float saldo) {
+        this.saldo = saldo;
+    }
+
     public Reiziger getReiziger() {
-        return reizigerObj;
+        return reiziger;
     }
-    public void setReiziger(Reiziger reizigerObj, boolean relationCalled) {
-        this.reizigerObj = reizigerObj;
 
-        if (!relationCalled) {
-            ArrayList<OVChipkaart> ovChipkaartList = new ArrayList();
-            ovChipkaartList.add(this);
-            this.reizigerObj.setOvChipkaartList(ovChipkaartList, true);
+    public void setReiziger(Reiziger reiziger) {
+        this.reiziger = reiziger;
+    }
+
+    public ArrayList<Product> getProducten() {return producten;}
+
+    public void setProducten(ArrayList<Product> producten) {
+        this.producten = producten;
+    }
+
+    public boolean deleteOvChipkaart(OVChipkaart ovChipkaart) {
+        // Bij alle producten de OV Chipkaart uit de lijst met chipkaarten halen.
+        for (Product product : Product.alleProducten) {
+            product.removeOvChipkaart(ovChipkaart);
         }
-    }
-    public ArrayList<Product> getProductList() {return productlist;}
-    public void setProductList(ArrayList<Product> productList, boolean relationCalled) {
-        this.productlist = productList;
+        // Chipkaart uit de lijst met alle chipkaarten halen.
+        alleOvChipkaarten.remove(ovChipkaart);
 
-        if (!relationCalled) {
-            for (Product product : this.productlist) {
-                ArrayList<OVChipkaart> ovChipkaartList = new ArrayList();
-                ovChipkaartList.add(this);
-                product.setOvChipkaartList(ovChipkaartList, true);
+        // Chipkaart bij de reiziger eruit halen.
+        return ovChipkaart.getReiziger().getOVChipkaarten().remove(ovChipkaart);
+    }
+
+    public boolean addProduct(Product product){
+        return this.producten.add(product);
+    }
+
+    public boolean removeProduct(Product product){return this.producten.remove(product);}
+
+    public static OVChipkaart findById(int id){
+        for(OVChipkaart ovChipkaart : alleOvChipkaarten){
+            if(ovChipkaart.getKaartNummer() == id){
+                return ovChipkaart;
             }
         }
+        return null;
     }
+
+    @Override
     public String toString() {
-        String string = "OvChipkaart{ ";
-
-        string += internalGetInfo() + ", ";
-        if (this.reizigerObj != null) {
-            string += "Reiziger" + this.reizigerObj.getInfo();
-        } else {
-            string += "null";
+        StringBuilder s = new StringBuilder();
+        s.append("OVChipkaart {" + "Kaart Nummer=").append(kaartNummer).append(", Geldig Tot=").append(geldigTot).append(", Klasse=").append(klasse).append(", Saldo=").append(saldo).append(", Producten = [");
+        for(Product product : producten){
+            s.append("{ID: ").append(product.getProductNummer()).append(", Naam: ").append(product.getNaam()).append(", Beschrijving: ").append(product.getBeschrijving()).append(", Prijs: ").append(product.getPrijs()).append("}");
         }
-
-        string += " }";
-        return string;
+        s.append("]}");
+        return s.toString();
     }
-
-    public String getInfo() {
-        return  "{ " + this.internalGetInfo() + " }";
-    }
-
-    private String internalGetInfo() {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String geldigTotStr = dateFormat.format(this.geldig_tot);
-
-        String string = "";
-        string += this.kaart_nummer  + ", ";
-        string += geldigTotStr + ", ";
-        string += this.klasse + ", ";
-        string += this.saldo + ", ";
-        string += this.reiziger_id;
-
-        return string;
-    }
-
 }

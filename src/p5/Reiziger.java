@@ -1,83 +1,31 @@
 package p5;
 
-import java.sql.Date;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Date;
 
 public class Reiziger {
-    private int Id;
+    private int id;
     private String voorletters;
     private String tussenvoegsel;
     private String achternaam;
     private Date geboortedatum;
-    private Adres adres;
-    private ArrayList<OVChipkaart> OvChipkaartList;
+    private Adres adres = null;
+    private ArrayList<OVChipkaart> OVChipkaarten = new ArrayList<>();
 
-    public Reiziger(int id, String vl, String tv, String an, Date gd) {
-        this.Id=id;
-        this.voorletters=vl;
-        this.tussenvoegsel=tv;
-        this.achternaam=an;
-        this.geboortedatum=gd;
-    }
-    public String getInfo() {
-        return  "{ " + this.extrainfo() + " }";
-    }
-
-
-    public String toString() {
-        String AdresObjString = "";
-
-        if (this.adres != null) {
-            AdresObjString += "Adres" + this.adres.getInfo();
-        } else {
-            AdresObjString += "null";
-        }
-
-        String OvChipkaartList = "";
-        if (this.OvChipkaartList != null && !this.OvChipkaartList.isEmpty()) {
-            OvChipkaartList += "chip kaarten lijst[";
-            for (int i=0; i <this.OvChipkaartList.size(); i++) {
-                if (i > 1) {
-                    OvChipkaartList += ", ";
-                }
-                OvChipkaartList += " OvChipkaart" + this.OvChipkaartList.get(i).getInfo();
-            }
-            OvChipkaartList += " ]";
-        } else {
-            OvChipkaartList = "null";
-        }
-
-        String rs = "Reiziger{ ";
-        rs += extrainfo() + ", ";
-        rs += AdresObjString + ", ";
-        rs += OvChipkaartList;
-        rs += " }";
-
-        return rs;
-    }
-
-
-    private String extrainfo() {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String gDatumStr = dateFormat.format(this.geboortedatum);
-
-        String reizigerStr = "";
-        reizigerStr += this.Id + ", ";
-        reizigerStr += this.voorletters + ", ";
-        reizigerStr += this.tussenvoegsel + ", ";
-        reizigerStr += this.achternaam + ", ";
-        reizigerStr += gDatumStr;
-        return reizigerStr;
+    public Reiziger(int id, String voorletters, String tussenvoegsel, String achternaam, Date geboortedatum) {
+        this.id = id;
+        this.voorletters = voorletters;
+        this.tussenvoegsel = tussenvoegsel;
+        this.achternaam = achternaam;
+        this.geboortedatum = geboortedatum;
     }
 
     public int getId() {
-        return Id;
+        return id;
     }
+
     public void setId(int id) {
-        Id = id;
+        this.id = id;
     }
 
     public String getVoorletters() {
@@ -112,22 +60,48 @@ public class Reiziger {
         this.geboortedatum = geboortedatum;
     }
 
-    public void setAdres(Adres adresObj, boolean relationCalled) {
-        this.adres = adresObj;
-        if (!relationCalled){
-            this.adres.setReiziger(this, true);
-        }
-    }
     public Adres getAdres() {
         return adres;
     }
 
-    public ArrayList<OVChipkaart> getOvChipkaartList() {return this.OvChipkaartList;}
-    public void setOvChipkaartList(ArrayList<OVChipkaart> ovChipkaartList, boolean relationCalled) {
-        this.OvChipkaartList = ovChipkaartList;
-        if (!relationCalled) {
-            for (OVChipkaart ovChipkaart : this.OvChipkaartList) {
-                ovChipkaart.setReiziger(this, true);
+    public void setAdres(Adres adres) {
+        this.adres = adres;
+    }
+
+    public ArrayList<OVChipkaart> getOVChipkaarten() {
+        return OVChipkaarten;
+    }
+
+    public void setOVChipkaarten(ArrayList<OVChipkaart> OVChipkaarten) {
+        this.OVChipkaarten = OVChipkaarten;
+    }
+
+    public String getOvChipkaartenString() {
+        if (getOVChipkaarten().size()!=0){
+            String returnString = "OV Chipkaarten:";
+            for (OVChipkaart ovChipkaart : getOVChipkaarten()){
+                returnString = returnString + ovChipkaart.toString();
+            }
+            return returnString;
+        }
+        else{
+            return "Geen OV Chipkaarten";
+        }
+    }
+    public String toString() {
+        if (adres!=null) {
+            if (this.tussenvoegsel != null) {
+                return "Reiziger {#" + id + ": " + voorletters + " " + tussenvoegsel + " " + achternaam + " (" + geboortedatum.toString() + "), " + adres.toString() +", "+getOvChipkaartenString()+"}";
+            } else {
+                return "Reiziger {#" + id + ": " + voorletters + " " + achternaam + " (" + geboortedatum.toString() + "), " + adres.toString() + ", "+getOvChipkaartenString()+"}";
             }
         }
-    }}
+        else {
+            if (this.tussenvoegsel != null) {
+                return "Reiziger {#" + id + ": " + voorletters + " " + tussenvoegsel + " " + achternaam + " (" + geboortedatum.toString() + "), Geen Adres, "+getOvChipkaartenString()+"}";
+            } else {
+                return "Reiziger {#" + id + ": " + voorletters + " " + achternaam + " (" + geboortedatum.toString() + "), Geen Adres, "+getOvChipkaartenString()+"}";
+            }
+        }
+    }
+}

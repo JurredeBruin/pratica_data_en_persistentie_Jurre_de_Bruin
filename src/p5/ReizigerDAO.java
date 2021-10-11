@@ -1,14 +1,14 @@
 package p5;
 
-import java.util.List;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
 
 public interface ReizigerDAO {
-    boolean save(Reiziger reiziger);
-    boolean update(Reiziger reiziger);
-    boolean delete(Reiziger reiziger);
-    List<Reiziger> findAll();
-    Reiziger findByid(int id);
-    List<Reiziger> findByGbdatum(String datum);
-
-    Reiziger findByAdres(Adres adres);
+    public boolean save(Reiziger reiziger) throws SQLException;
+    public boolean update(Reiziger reiziger) throws SQLException;
+    public boolean delete(Reiziger reiziger) throws SQLException;
+    public Reiziger findById(int id) throws SQLException;
+    public Reiziger findByGbdatum(Date geboortedatum) throws SQLException;
+    public ArrayList<Reiziger> findAll() throws SQLException;
 }

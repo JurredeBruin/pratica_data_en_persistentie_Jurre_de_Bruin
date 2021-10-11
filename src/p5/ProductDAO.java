@@ -1,13 +1,13 @@
 package p5;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 
 public interface ProductDAO {
-    boolean save(Product product);
-    boolean update(Product product);
-    boolean delete(Product product);
-    ArrayList<Product>findByOvchipkaart(OVChipkaart ovChipkaart);
-    ArrayList<Product> findAll();
+    public boolean save(Product product) throws SQLException;
+    public boolean update(Product product) throws SQLException;
+    public boolean delete(Product product);
+    public ArrayList<Product> findByOvChipkaart(OVChipkaart ovChipkaart) throws SQLException;
+    public ArrayList<Product> findAll() throws SQLException;
 
 }

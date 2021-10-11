@@ -1,264 +1,177 @@
 package p5;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 
 public class ProductDAOPsql implements ProductDAO {
-    private Connection Conn;
+    private Connection conn;
     private OVChipkaartDAOPsql ovdao;
+    public static boolean saved = false;
 
-    public ProductDAOPsql(Connection conn,OVChipkaartDAOPsql ovdao) {
-        this.Conn = conn;
-        this.ovdao=ovdao;
+    public ProductDAOPsql(Connection conn) throws SQLException {
+        this.conn = conn;
     }
 
+    @Override
+    public boolean save(Product product) throws SQLException {
 
-    public boolean save(Product product) {
-        if ( this.__save(product) ) {
-            this.ovdao.saveList(product.getOvChipkaartList());
-        }
-        return false;
-    }
+        // Query om nieuw product op te slaan in database.
+        String saveQuery = "insert into product (product_nummer, naam, beschrijving, prijs) values (?, ?, ?, ?)";
 
-    private boolean __save(Product product) {
-        try {
-            String q = "INSERT INTO product (product_nummer, naam, beschrijving, prijs) VALUES (?, ?, ?, ?)";
-            PreparedStatement pst = this.Conn.prepareStatement(q);
-            pst.setInt(1, product.getProduct_nummer() );
-            pst.setString(2, product.getNaam() );
-            pst.setString(3, product.getBeschrijving() );
-            pst.setDouble(4, product.getPrijs() );
+        // Gebruik van prepared statement om makkelijk variabelen in de query te doen.
+        try(PreparedStatement ps = conn.prepareStatement(saveQuery)) {
+            ps.setInt(1, product.getProductNummer());
+            ps.setString(2, product.getNaam());
+            ps.setString(3, product.getBeschrijving());
+            ps.setFloat(4, product.getPrijs());
 
-            pst.execute();
-            pst.close();
-            return true;
-        } catch(Exception err) {
-            System.err.println("ProductDaopsql geeft een error in __save(): " + err.getMessage() );
+            // Prepared statement uitvoeren en closen.
+            ps.execute();
+            ps.close();
+        }catch (SQLException e){
             return false;
         }
-    }
 
-    public boolean saveList(ArrayList<Product> productArrayList) {
-        try {
-            if ( productArrayList == null || productArrayList.isEmpty() ) {
-                throw new Exception("Product Arraylist is invalid");
+        // Alle bijbehorende chipkaarten opslaan
+        ovdao = new OVChipkaartDAOPsql(conn);
+        ArrayList<OVChipkaart> databaseChipkaarten = ovdao.findAll();
+
+        for(int chipkaartId : product.getOvChipkaarten()){
+            if(!databaseChipkaarten.contains(OVChipkaart.findById(chipkaartId))){
+                ovdao.save(OVChipkaart.findById(chipkaartId));
             }
+        }
 
-            for (Product product : productArrayList) {
-                this.__save(product);
+        // Query om nieuw object in de tussentabel op te slaan.
+        if(saved == false) {
+            String saveTussenQuery = "insert into ov_chipkaart_product (kaart_nummer, product_nummer) values (?, ?);";
+
+            for (Integer ovChipkaartId : product.getOvChipkaarten()) {
+                try (PreparedStatement ps = conn.prepareStatement(saveTussenQuery)) {
+                    ps.setInt(1, ovChipkaartId);
+                    ps.setInt(2, product.getProductNummer());
+                    ps.execute();
+                    saved = true;
+                    return true;
+                } catch (SQLException e) {
+                    System.out.println("Error saving new chipkaart-product object");
+                    System.out.println(e);
+                    return false;
+                }
             }
-            return true;
-        } catch(Exception err) {
-            System.err.println("ProductDaopsql geeft een error in saveList(): " + err.getMessage() );
-            return false;
         }
+        else{saved = false;}
+        return true;
     }
 
-    private boolean __update(Product product) {
-        try {
-            String q = "UPDATE product SET naam=?, beschrijving=?, prijs=? WHERE product_nummer=?;";
-            PreparedStatement pst = this.Conn.prepareStatement(q);
-            pst.setString(1, product.getNaam() );
-            pst.setString(2, product.getBeschrijving() );
-            pst.setDouble(3, product.getPrijs() );
-            pst.setInt(4, product.getProduct_nummer() );
+    @Override
+    public boolean update(Product product) throws SQLException {
+        // Query om een product te updaten.
+        String updateQuery = "UPDATE product SET naam = ?, beschrijving = ?, prijs = ? WHERE product_nummer = ?;";
 
-            pst.execute();
-            pst.close();
-            return true;
-        } catch(Exception err) {
-            System.err.println("ProductDaopsql geeft een error in __update(): " + err.getMessage() );
-            return false;
+        // Variabelen in de query stoppen.
+        try(PreparedStatement ps = conn.prepareStatement(updateQuery)) {
+            ps.setString(1, product.getNaam());
+            ps.setString(2, product.getBeschrijving());
+            ps.setFloat(3, product.getPrijs());
+            ps.setInt(4, product.getProductNummer());
+
+            // Prepared statement uitvoeren en closen.
+            ps.execute();
+            ps.close();
+        }catch (SQLException e){
+            System.out.println("Error updating Product");
+            System.out.println(e);
         }
+        ovdao = new OVChipkaartDAOPsql(conn);
+        ArrayList<OVChipkaart> databaseChipkaarten = ovdao.findAll();
+        for(int ovChipkaartId : product.getOvChipkaarten()){
+            OVChipkaart ovChipkaart = OVChipkaart.findById(ovChipkaartId);
+            ovdao.delete(ovChipkaart);
+            ovdao.save(ovChipkaart);
+        }
+        return true;
     }
 
-
-
-    public boolean update(Product product) {
-        if ( this.__update(product) ) {
-            return this.ovdao.updateList( product.getOvChipkaartList() );
-        }
-        return false;
-    }
-
-    public boolean updateList(ArrayList<Product> productArrayList) {
-        try {
-            if ( productArrayList == null || productArrayList.isEmpty() ) {
-                throw new Exception("Product Arraylist is invalid");
-            }
-
-            for (Product product : productArrayList) {
-                this.__update(product);
-            }
-            return true;
-        } catch(Exception err) {
-            System.err.println("ProductDaopsql geeft een error in updatelist(): " + err.getMessage() );
-            return false;
-        }
-    }
-
+    @Override
     public boolean delete(Product product) {
-        try {
-            if (this.deleteLink(product)) {
-                String q = "DELETE FROM product WHERE product_nummer=?";
-                PreparedStatement pst = this.Conn.prepareStatement(q);
-                pst.setInt(1, product.getProduct_nummer() );
+        // Product bij alle chipkaarten verwijderen.
+        product.deleteProduct(product);
 
-                pst.execute();
-                pst.close();
-                return true;
-            }
-            throw new Exception("productLinks could not be deleted");
-        } catch(Exception err) {
-            System.err.println("ProductDaopsql geeft een error in delete(): " + err.getMessage() );
-            return false;
-        }
-    }
-
-    private boolean deleteLink(Product product) {
-        try {
-            String q = "DELETE FROM ov_chipkaart_product WHERE product_nummer=?";
-            PreparedStatement pst = this.Conn.prepareStatement(q);
-            pst.setInt(1, product.getProduct_nummer() );
-
-            pst.execute();
-            pst.close();
+        // Delete query maken en uitvoeren
+        String deleteQuery = "DELETE FROM ov_chipkaart_product WHERE product_nummer = ?; DELETE FROM product WHERE product_nummer = ?; ";
+        try(PreparedStatement ps = conn.prepareStatement(deleteQuery)) {
+            ps.setInt(1, product.getProductNummer());
+            ps.setInt(2, product.getProductNummer());
+            ps.execute();
+            ps.close();
             return true;
-        } catch(Exception err) {
-            System.err.println("ProductDaopsql geeft een error in deletelink(): " + err.getMessage() );
+        }catch (SQLException e){
+            System.out.println("Error deleting product");
+            System.out.println(e);
             return false;
         }
+
+
     }
 
-    public boolean deleteList(ArrayList<Product> productArrayList) {
-        try {
-            if ( productArrayList == null || productArrayList.isEmpty() ) {
-                throw new Exception("Product Arraylist is invalid");
-            }
+    @Override
+    public ArrayList<Product> findByOvChipkaart(OVChipkaart ovChipkaart) throws SQLException {
+        String findQuery = "SELECT * FROM product JOIN ov_chipkaart_product as ocp ON product.product_nummer = ocp.product_nummer WHERE ocp.kaart_nummer = ?;";
+        String ovQuery = "SELECT ov_chipkaart.kaart_nummer FROM ov_chipkaart JOIN ov_chipkaart_product as ocp ON ov_chipkaart.kaart_nummer = ocp.kaart_nummer WHERE ocp.product_nummer = ?";
 
-            for (Product product : productArrayList) {
-                this.delete(product);
+        ArrayList<Product> products = new ArrayList<>();
+        ovdao = new OVChipkaartDAOPsql(conn);
+        try(PreparedStatement ps = conn.prepareStatement(findQuery)){
+            ps.setInt(1, ovChipkaart.getKaartNummer());
+            ResultSet results = ps.executeQuery();
+            while (results.next()){
+                Product product = new Product(results.getInt("product_nummer"), results.getString("naam"), results.getString("beschrijving"), results.getFloat("prijs"));
+                try(PreparedStatement ovps = conn.prepareStatement(ovQuery)) {
+                    ovps.setInt(1, product.getProductNummer());
+                    ResultSet ovResults = ovps.executeQuery();
+                    while (ovResults.next()){
+                        product.getOvChipkaarten().add(ovResults.getInt("kaart_nummer"));
+                    }
+                }
+                products.add(product);
             }
-            return true;
-        } catch(Exception err) {
-            System.err.println("ProductDaopsql geeft een error in deletelist(): " + err.getMessage() );
-            return false;
+            return products;
+        }catch (SQLException e){
+            System.out.println("Error getting all products by chipkaart");
+            System.out.println(e);
+            return null;
         }
     }
 
-//    public List<Product> findall() {
-//        List<Product> prArray = new ArrayList<>();
-//        try {
-//            Statement st = this.Conn.createStatement();
-//            ResultSet rs = st.executeQuery("select * from product");
-//
-//            while ( rs.next() ) {
-////                String query = "Update ov_chipkaart set geldig_tot=?,klasse=?,saldo=?,reiziger_id=? where kaart_nummer=?";
-//
-//                Product pr = new Product(
-//                        rs.getInt("product_nummer"),
-//                        rs.getString("naam"),
-//                        rs.getString("beschrijving"),
-//                        rs.getDouble("prijs")
-//                );
-//
-////                OVChipkaart ovChipkaart = ovdao.findByProduct(pr);
-////                pr.setovchipkaart(ovChipkaart);
-//
-//                prArray.add(pr);
-//            }
-//            rs.close();
-//        } catch(Exception err) {
-//            System.err.println("AdresDAOsql geeft een error in findAll(): " + err.getMessage() );
-//        }
-//        return prArray;
-//    }
-    public ArrayList<Product>findByOvchipkaart(OVChipkaart ovChipkaart) {
-        ArrayList<Product> productArrayList = new ArrayList<>();
-        try {
-            String q = "SELECT product.product_nummer, naam, beschrijving, prijs FROM ov_chipkaart_product " +
-                    "INNER JOIN product ON ov_chipkaart_product.product_nummer = product.product_nummer " +
-                    "WHERE kaart_nummer = ?";
-            PreparedStatement pst = this.Conn.prepareStatement(q);
-            pst.setInt(1, ovChipkaart.getKaart_nummer() );
-            ResultSet rs = pst.executeQuery();
+    @Override
+    public ArrayList<Product> findAll() throws SQLException {
+        String findQuery = "SELECT * FROM product;";
+        String ovQuery = "SELECT ov_chipkaart.kaart_nummer FROM ov_chipkaart JOIN ov_chipkaart_product as ocp ON ov_chipkaart.kaart_nummer = ocp.kaart_nummer WHERE ocp.product_nummer = ?;";
 
-            while (rs.next() ) {
-                Product product = this.retrieveResultset(rs, ovChipkaart);
-                productArrayList.add(product);
+        ArrayList<Product> products = new ArrayList<>();
+        ovdao = new OVChipkaartDAOPsql(conn);
+        try(PreparedStatement ps = conn.prepareStatement(findQuery)){
+            ResultSet results = ps.executeQuery();
+            while (results.next()){
+                Product product = new Product(results.getInt("product_nummer"), results.getString("naam"), results.getString("beschrijving"), results.getFloat("prijs"));
+                try(PreparedStatement ovps = conn.prepareStatement(ovQuery)) {
+                    ovps.setInt(1, product.getProductNummer());
+                    ResultSet ovResults = ovps.executeQuery();
+                    while (ovResults.next()){
+                        product.getOvChipkaarten().add(ovResults.getInt("kaart_nummer"));
+                    }
+                }
+                products.add(product);
             }
-            rs.close();
-            pst.close();
-        } catch(Exception err) {
-            System.err.println("ProductDAOPsql geeft een error in findbyovChipkaart(): " + err.getMessage() );
+            return products;
+        }catch (SQLException e){
+            System.out.println("Error getting all products");
+            System.out.println(e);
+            return null;
         }
-
-        return productArrayList;
-    }
-    public Product findById(int id) {
-        Product product = null;
-        try {
-            String q = "SELECT product_nummer, naam, beschrijving, prijs FROM product WHERE product_nummer = ?";
-            PreparedStatement pst = this.Conn.prepareStatement(q);
-            pst.setInt(1, id);
-            ResultSet rs = pst.executeQuery();
-
-            if (rs.next() ) {
-                product = this.retrieveResultset(rs, null);
-            }
-            rs.close();
-            pst.close();
-
-        } catch(Exception err) {
-            System.err.println("productDAOPsql geeft een error in findbyID(): " + err.getMessage() );
-        }
-        return product;
-    }
-    public ArrayList<Product> findAll() {
-        ArrayList<Product> productArrayList = new ArrayList<>();
-        try {
-            String q = "SELECT product_nummer, naam, beschrijving, prijs FROM product";
-            PreparedStatement pst = this.Conn.prepareStatement(q);
-            ResultSet rs = pst.executeQuery();
-
-            while (rs.next() ) {
-                Product product = this.retrieveResultset(rs, null);
-                productArrayList.add(product);
-            }
-            rs.close();
-            pst.close();
-        } catch(Exception err) {
-            System.err.println("productDAOPsql geeft een error in findall(): " + err.getMessage() );
-        }
-
-        return productArrayList;
-    }
-    private void __addRelations(Product product ) {
-        ArrayList<OVChipkaart> ovChipkaartList = ovdao.findByProduct( product );
-        product.setOvChipkaartList(ovChipkaartList, false);
-    }
-    private Product retrieveResultset(ResultSet rs, OVChipkaart ovchipkaart) {
-        Product product = null;
-        try {
-            product = new Product(
-                    rs.getInt("product_nummer"),
-                    rs.getString("naam"),
-                    rs.getString("beschrijving"),
-                    rs.getDouble("prijs")
-            );
-
-            if (ovchipkaart == null) {
-                __addRelations(product);
-            } else {
-                ArrayList<OVChipkaart> ovChipkaartList = new ArrayList();
-                ovChipkaartList.add(ovchipkaart);
-                product.setOvChipkaartList(ovChipkaartList, false);
-            }
-
-        } catch (Exception err) {
-            System.err.println("OvchipkaartDAOsql geeft een error in __retrieveResultSet(): " + err.getMessage());
-        }
-        return product;
     }
 }
