@@ -7,7 +7,6 @@ public class Product {
     private String naam;
     private String beschrijving;
     private float prijs;
-    // Ik gebruik hier een list van ID's in plaats van de objecten zelf om looping te voorkomen
     private ArrayList<Integer> ovChipkaartenIds = new ArrayList<>();
 
     public static ArrayList<Product> alleProducten = new ArrayList<>();

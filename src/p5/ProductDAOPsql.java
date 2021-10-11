@@ -18,24 +18,20 @@ public class ProductDAOPsql implements ProductDAO {
     @Override
     public boolean save(Product product) throws SQLException {
 
-        // Query om nieuw product op te slaan in database.
         String saveQuery = "insert into product (product_nummer, naam, beschrijving, prijs) values (?, ?, ?, ?)";
 
-        // Gebruik van prepared statement om makkelijk variabelen in de query te doen.
         try(PreparedStatement ps = conn.prepareStatement(saveQuery)) {
             ps.setInt(1, product.getProductNummer());
             ps.setString(2, product.getNaam());
             ps.setString(3, product.getBeschrijving());
             ps.setFloat(4, product.getPrijs());
 
-            // Prepared statement uitvoeren en closen.
             ps.execute();
             ps.close();
         }catch (SQLException e){
             return false;
         }
 
-        // Alle bijbehorende chipkaarten opslaan
         ovdao = new OVChipkaartDAOPsql(conn);
         ArrayList<OVChipkaart> databaseChipkaarten = ovdao.findAll();
 
@@ -45,7 +41,6 @@ public class ProductDAOPsql implements ProductDAO {
             }
         }
 
-        // Query om nieuw object in de tussentabel op te slaan.
         if(saved == false) {
             String saveTussenQuery = "insert into ov_chipkaart_product (kaart_nummer, product_nummer) values (?, ?);";
 
@@ -69,10 +64,8 @@ public class ProductDAOPsql implements ProductDAO {
 
     @Override
     public boolean update(Product product) throws SQLException {
-        // Query om een product te updaten.
         String updateQuery = "UPDATE product SET naam = ?, beschrijving = ?, prijs = ? WHERE product_nummer = ?;";
 
-        // Variabelen in de query stoppen.
         try(PreparedStatement ps = conn.prepareStatement(updateQuery)) {
             ps.setString(1, product.getNaam());
             ps.setString(2, product.getBeschrijving());
@@ -98,10 +91,8 @@ public class ProductDAOPsql implements ProductDAO {
 
     @Override
     public boolean delete(Product product) {
-        // Product bij alle chipkaarten verwijderen.
         product.deleteProduct(product);
 
-        // Delete query maken en uitvoeren
         String deleteQuery = "DELETE FROM ov_chipkaart_product WHERE product_nummer = ?; DELETE FROM product WHERE product_nummer = ?; ";
         try(PreparedStatement ps = conn.prepareStatement(deleteQuery)) {
             ps.setInt(1, product.getProductNummer());

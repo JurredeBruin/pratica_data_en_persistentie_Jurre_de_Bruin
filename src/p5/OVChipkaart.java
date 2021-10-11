@@ -72,14 +72,11 @@ public class OVChipkaart {
     }
 
     public boolean deleteOvChipkaart(OVChipkaart ovChipkaart) {
-        // Bij alle producten de OV Chipkaart uit de lijst met chipkaarten halen.
         for (Product product : Product.alleProducten) {
             product.removeOvChipkaart(ovChipkaart);
         }
-        // Chipkaart uit de lijst met alle chipkaarten halen.
         alleOvChipkaarten.remove(ovChipkaart);
 
-        // Chipkaart bij de reiziger eruit halen.
         return ovChipkaart.getReiziger().getOVChipkaarten().remove(ovChipkaart);
     }
 
